@@ -23,9 +23,6 @@ public class IssueBookController {
     @FXML
     private TextField userId;
 
-
-    AlertMessage alert = new AlertMessage();
-
     public IssueBookController(){
 
     }

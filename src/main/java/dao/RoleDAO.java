@@ -51,14 +51,10 @@ public class RoleDAO {
     }
 
     public Role getRoleById(int id) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        try{
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.get(Role.class, id);
         } catch (Exception e) {
             throw new RuntimeException(e);
-        }
-        finally {
-            session.close();
         }
     }
 

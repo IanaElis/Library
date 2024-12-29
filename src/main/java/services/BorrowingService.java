@@ -6,7 +6,6 @@ import dao.BorrowingStatusDAO;
 import dao.UserDAO;
 import entity.Book;
 import entity.Borrowing;
-import entity.BorrowingStatus;
 import entity.User;
 
 import java.time.LocalDate;
@@ -54,7 +53,7 @@ public class BorrowingService {
     }
 
     public String returnBook(Borrowing borrowing) {
-        String s = null;
+        String s;
         if(borrowing != null){
             Book book = bookDAO.getBookById(borrowing.getBook().getId());
             borrowing.setStatus(borrowingStatusDAO.getBorrowingStatusById(2));

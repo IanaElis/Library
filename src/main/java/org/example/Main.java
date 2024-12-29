@@ -2,15 +2,9 @@ package org.example;
 
 import dao.RegisterFormDAO;
 import dao.RegisterStatusDAO;
-import dao.RoleDAO;
-import dao.UserDAO;
 import entity.RegisterForm;
-import entity.RegisterStatus;
-import entity.Role;
-import entity.User;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 public class Main {
     public static void main(String[] args) {

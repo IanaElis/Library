@@ -10,11 +10,9 @@ import java.util.List;
 
 public class BookService {
     private BookDAO bookDAO;
-    private BorrowingDAO borrowingDAO;
 
     public BookService() {
         bookDAO = new BookDAO();
-        borrowingDAO = new BorrowingDAO();
     }
 
     public String addBook(Book book) {
