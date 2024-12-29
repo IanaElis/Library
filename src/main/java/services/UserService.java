@@ -1,7 +1,6 @@
 package services;
 
 import dao.RegisterFormDAO;
-import dao.RegisterStatusDAO;
 import dao.UserDAO;
 import entity.RegisterForm;
 import entity.User;
