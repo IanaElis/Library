@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+    "-//Hibernate/Hibernate Configuration DTD//EN"
+    "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+  <session-factory>
+    <property name="connection.url">jdbc:oracle:thin:@localhost:1521:XE</property>
+    <property name="connection.driver_class">oracle.jdbc.OracleDriver</property>
+    <property name="connection.username">Library</property>
+    <property name="connection.password">1111</property>
+    <property name="hibernate.dialect">org.hibernate.dialect.Oracle10gDialect</property>
+    <property name="show_sql">true</property>
+    <property name="format_sql">true</property>
+
+    <mapping class="entity.UserNotification"/>
+    <mapping class="entity.User"/>
+    <mapping class="entity.Role"/>
+    <mapping class="entity.RegisterStatus"/>
+    <mapping class="entity.RegisterForm"/>
+    <mapping class="entity.Notification"/>
+    <mapping class="entity.BorrowingStatus"/>
+    <mapping class="entity.Borrowing"/>
+    <mapping class="entity.BookStatus"/>
+    <mapping class="entity.Book"/>
+
+
+
+
+    <!-- DB schema will be updated if needed -->
+    <!-- <property name="hibernate.hbm2ddl.auto">update</property> -->
+  </session-factory>
+</hibernate-configuration>
