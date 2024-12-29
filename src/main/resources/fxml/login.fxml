@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.text.Font?>
+
+<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="350.0" prefWidth="550.0" xmlns="http://javafx.com/javafx/17.0.13" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.LoginController">
+   <children>
+      <AnchorPane fx:id="main_form" prefHeight="350.0" prefWidth="550.0">
+         <children>
+            <AnchorPane fx:id="register_form" prefHeight="350.0" prefWidth="550.0" style="-fx-background-color: #DDD9CA; -fx-border-width: 10; -fx-border-color: #8C826E;">
+               <children>
+                  <TextField fx:id="register_showPass" layoutX="27.0" layoutY="151.0" prefHeight="20.0" prefWidth="200.0" promptText="Password" />
+                  <Label contentDisplay="CENTER" layoutX="82.0" layoutY="36.0" lineSpacing="10.0" text="Register" textAlignment="CENTER">
+                     <font>
+                        <Font name="Britannic Bold" size="24.0" />
+                     </font>
+                  </Label>
+                  <TextField fx:id="register_email" layoutX="27.0" layoutY="111.0" prefHeight="20.0" prefWidth="200.0" promptText="Email" />
+                  <TextField fx:id="register_name" layoutX="27.0" layoutY="73.0" prefHeight="20.0" prefWidth="200.0" promptText="Full Name" />
+                  <CheckBox fx:id="register_checkBx" layoutX="27.0" layoutY="229.0" mnemonicParsing="false" onAction="#showPassword" text="Show Password" />
+                  <Button fx:id="register_regBtn" layoutX="27.0" layoutY="260.0" mnemonicParsing="false" onAction="#handleRegister" prefHeight="30.0" prefWidth="200.0" text="Sign up" />
+                  <Label layoutX="27.0" layoutY="305.0" text="Already have an account?" />
+                  <Hyperlink fx:id="register_loginLink" layoutX="183.0" layoutY="302.0" onAction="#switchForm" text="Login" />
+                  <TextField fx:id="register_phone_number" layoutX="27.0" layoutY="191.0" prefHeight="20.0" prefWidth="200.0" promptText="Phone number" />
+                  <PasswordField fx:id="register_password" layoutX="27.0" layoutY="151.0" prefHeight="20.0" prefWidth="200.0" promptText="Password" />
+               </children>
+            </AnchorPane>
+            <AnchorPane fx:id="login_form" prefHeight="350.0" prefWidth="550.0" style="-fx-border-color: #8C826E; -fx-border-width: 10; -fx-background-color: #DDD9CA;">
+               <children>
+                  <TextField fx:id="login_showPass" layoutX="28.0" layoutY="110.0" prefHeight="20.0" prefWidth="200.0" promptText="Password" />
+                  <Label contentDisplay="CENTER" layoutX="85.0" layoutY="36.0" lineSpacing="10.0" text="Login" textAlignment="CENTER">
+                     <font>
+                        <Font name="Britannic Bold" size="24.0" />
+                     </font>
+                  </Label>
+                  <TextField fx:id="login_email" layoutX="28.0" layoutY="73.0" prefHeight="20.0" prefWidth="200.0" promptText="Email" />
+                  <CheckBox fx:id="login_checkBx" layoutX="28.0" layoutY="145.0" mnemonicParsing="false" onAction="#showPassword" text="Show Password" />
+                  <Button fx:id="login_loginBtn" layoutX="29.0" layoutY="178.0" mnemonicParsing="false" onAction="#handleLogin" prefHeight="30.0" prefWidth="200.0" text="Login" />
+                  <Label layoutX="38.0" layoutY="225.0" text="Have no account?" />
+                  <Hyperlink fx:id="login_registerLink" layoutX="141.0" layoutY="222.0" onAction="#switchForm" text="Register" />
+                  <PasswordField fx:id="login_password" layoutX="29.0" layoutY="111.0" prefHeight="20.0" prefWidth="200.0" promptText="Password" />
+               </children>
+            </AnchorPane>
+         </children>
+      </AnchorPane>
+   </children>
+</StackPane>

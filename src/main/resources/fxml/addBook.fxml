@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="498.0" prefWidth="412.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.AddBookController">
+   <children>
+      <Label layoutX="60.0" layoutY="80.0" text="ISBN" />
+      <Label layoutX="60.0" layoutY="120.0" text="Title" />
+      <Label layoutX="60.0" layoutY="160.0" text="Author" />
+      <Label layoutX="60.0" layoutY="200.0" text="Genre" />
+      <Label layoutX="60.0" layoutY="240.0" text="Year published" />
+      <Label layoutX="60.0" layoutY="280.0" text="Total Quantity" />
+      <Label layoutX="60.0" layoutY="320.0" text="Available Quantity" />
+      <TextField fx:id="isbn" layoutX="180.0" layoutY="76.0" />
+      <TextField fx:id="title" layoutX="180.0" layoutY="116.0" />
+      <TextField fx:id="author" layoutX="180.0" layoutY="156.0" />
+      <TextField fx:id="av_q" layoutX="180.0" layoutY="316.0" />
+      <TextField fx:id="total_q" layoutX="180.0" layoutY="276.0" />
+      <Button layoutX="139.0" layoutY="413.0" mnemonicParsing="false" onAction="#addBookForm" prefHeight="37.0" prefWidth="111.0" text="Add Book" />
+      <ComboBox fx:id="genre" layoutX="180.0" layoutY="196.0" prefWidth="150.0" />
+      <DatePicker fx:id="year" layoutX="180.0" layoutY="236.0" />
+      <Label layoutX="60.0" layoutY="360.0" text="Publisher" />
+      <TextField fx:id="publisher" layoutX="180.0" layoutY="356.0" />
+   </children>
+</AnchorPane>
