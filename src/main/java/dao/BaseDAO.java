@@ -1,6 +1,5 @@
 package dao;
 
-import entity.Book;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import util.HibernateUtil;
@@ -9,7 +8,7 @@ public abstract class BaseDAO<T> implements DAO<T> {
 
     public boolean saveOrUpdate(T entity) {
         if(entity == null) {
-            throw new IllegalArgumentException("Provided "+entity.getClass()+" is null");
+            throw new IllegalArgumentException("Provided object is null");
         }
         Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
@@ -26,7 +25,7 @@ public abstract class BaseDAO<T> implements DAO<T> {
 
     public void delete(T entity) {
         if(entity == null) {
-            throw new IllegalArgumentException("Provided "+entity.getClass()+" is null");
+            throw new IllegalArgumentException("Provided object is null");
         }
         Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
