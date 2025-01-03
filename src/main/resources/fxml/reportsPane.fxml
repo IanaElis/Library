@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane id="reports" fx:id="reports_form" prefHeight="460.0" prefWidth="680.0" style="-fx-background-color: #DDD9CA;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ReportsPaneController">
+   <children>
+      <Label layoutX="44.0" layoutY="35.0" text="Reports">
+         <font>
+            <Font name="Britannic Bold" size="18.0" />
+         </font>
+      </Label>
+      <Button fx:id="rep_forms" layoutX="44.0" layoutY="97.0" mnemonicParsing="false" onAction="#makeReports" text="Forms created" />
+      <Button fx:id="rep_books" layoutX="44.0" layoutY="138.0" mnemonicParsing="false" onAction="#makeReports" text="Books" />
+      <Button fx:id="rep_users" layoutX="45.0" layoutY="182.0" mnemonicParsing="false" onAction="#makeReports" text="Users" />
+      <Button fx:id="rep_rating" layoutX="44.0" layoutY="224.0" mnemonicParsing="false" onAction="#makeReports" text="User rating" />
+      <Label layoutX="44.0" layoutY="63.0" text="Create reports for:" />
+      <TextArea fx:id="rep_report" layoutX="243.0" layoutY="41.0" prefHeight="403.0" prefWidth="393.0" />
+   </children>
+</AnchorPane>

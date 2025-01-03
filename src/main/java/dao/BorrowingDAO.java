@@ -1,6 +1,7 @@
 package dao;
 
 import entity.Borrowing;
+import entity.User;
 import org.hibernate.Session;
 import util.HibernateUtil;
 
@@ -8,40 +9,6 @@ import javax.persistence.NoResultException;
 import java.util.List;
 
 public class BorrowingDAO extends BaseDAO<Borrowing> {
-    /*
-    public void saveBorrowing(Borrowing borrowing) {
-        Transaction transaction = null;
-        if (borrowing == null) {
-            throw new IllegalArgumentException("Borrowing is null");
-        }
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            session.save(borrowing);
-            System.out.println(borrowing.toString());
-            transaction.commit();
-        } catch (HibernateException e) {
-            if (transaction != null) transaction.rollback();
-            e.printStackTrace();
-        }
-    }
-
-    public void deleteBorrowing(Borrowing borrowing) {
-        Transaction transaction = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            Borrowing b = session.get(Borrowing.class, borrowing.getBorId());
-            if (b != null) {
-                session.delete(b);
-            } else {
-                System.out.println("Borrowing with ID " + borrowing.getBorId() + " not found.");
-            }
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) transaction.rollback();
-            e.printStackTrace();
-        }
-    }
-     */
 
     public Borrowing getBorrowingById(int id) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
@@ -88,12 +55,25 @@ public class BorrowingDAO extends BaseDAO<Borrowing> {
                         .setParameter("id", userId)
                         .setParameter("bookId", bookId).list();
                 System.out.println(b.size());
+                System.out.println("b list res from db" + b);
+                if(b.size() == 0){
+                    return false;
+                }
                 return true;
             }
             catch(NoResultException e) {
                 return false;
             }
 
+        }
+    }
+
+    public int numberBorrowingsOverdue(User user){
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            List<Borrowing> b = session.createQuery("FROM Borrowing WHERE user.id =: id AND status.id = 3", Borrowing.class)
+                    .setParameter("id", user.getUserId())
+                    .list();
+            return b.size();
         }
     }
 }

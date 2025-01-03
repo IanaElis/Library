@@ -6,21 +6,20 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 
-public class AdminController {
+public class OperatorController {
     @FXML
     private AnchorPane books_form;
     @FXML
     private AnchorPane dashboard_form;
     @FXML
     private AnchorPane notifications_form;
-    @FXML
-    private AnchorPane operators_form;
     @FXML
     private AnchorPane profile_form;
     @FXML
@@ -37,8 +36,6 @@ public class AdminController {
     @FXML
     private Button notifications_btn;
     @FXML
-    private Button operators_btn;
-    @FXML
     private Button profile_btn;
     @FXML
     private Button readers_btn;
@@ -50,19 +47,14 @@ public class AdminController {
 
     private User loggedUser;
 
-
-    private OperatorsPaneController operatorsPaneController;
     private BooksPaneController booksPaneController;
     private ReadersPaneController readersPaneController;
     private NotificationsPaneController notificationsPaneController;
-    private ReportsPaneController reportsPaneController;
     private ProfilePaneController profilePaneController;
+    private ReportsPaneController reportsPaneController;
 
-    public AdminController() {
-    }
 
     public void initialize() throws IOException {
-        showOperatorsPane();
         showBooksPane();
         showReadersPane();
         showNotificationsPane();
@@ -80,13 +72,6 @@ public class AdminController {
             setFormsInvisible();
             dashboard_form.setVisible(true);
             showDashboard();
-        }
-        else if(event.getSource() == operators_btn) {
-            setFormsInvisible();
-            operators_form.setVisible(true);
-            operatorsPaneController.setLoggedUser(loggedUser);
-            operatorsPaneController.showOperators();
-
         }
         else if(event.getSource() == readers_btn) {
             setFormsInvisible();
@@ -123,7 +108,6 @@ public class AdminController {
 
     public void setFormsInvisible(){
         dashboard_form.setVisible(false);
-        operators_form.setVisible(false);
         readers_form.setVisible(false);
         books_form.setVisible(false);
         notifications_form.setVisible(false);
@@ -137,14 +121,6 @@ public class AdminController {
 
     public void showDashboard(){
 
-    }
-
-
-    public void showOperatorsPane() throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/OperatorsPane.fxml"));
-        Parent operatorsPane= loader.load();
-        operatorsPaneController = loader.getController();
-        operators_form.getChildren().setAll(operatorsPane);
     }
 
     public void showBooksPane() throws IOException {
@@ -161,18 +137,18 @@ public class AdminController {
         readers_form.getChildren().setAll(readersPane);
     }
 
-    public void showReportsPane() throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/reportsPane.fxml"));
-        Parent reportsPane = loader.load();
-        reportsPaneController = loader.getController();
-        reports_form.getChildren().setAll(reportsPane);
-    }
-
     public void showNotificationsPane() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/notificationsPane.fxml"));
         Parent notif = loader.load();
         notificationsPaneController = loader.getController();
         notifications_form.getChildren().setAll(notif);
+    }
+
+    public void showReportsPane() throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/reportsPane.fxml"));
+        Parent reportsPane = loader.load();
+        reportsPaneController = loader.getController();
+        reports_form.getChildren().setAll(reportsPane);
     }
 
     public void showProfilePane() throws IOException{
@@ -195,6 +171,4 @@ public class AdminController {
         primaryStage.setScene(scene);
         primaryStage.show();
     }
-
 }
-

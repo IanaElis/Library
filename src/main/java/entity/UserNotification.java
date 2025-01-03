@@ -26,9 +26,8 @@ public class UserNotification {
 
     public UserNotification() {}
 
-    public UserNotification(int id, User user, Notification notification,
+    public UserNotification(User user, Notification notification,
                             boolean isRead) {
-        this.id = id;
         this.user = user;
         this.notification = notification;
         this.isRead = isRead;
@@ -65,4 +64,5 @@ public class UserNotification {
     public void setRead(boolean read) {
         isRead = read;
     }
+
 }

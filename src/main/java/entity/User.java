@@ -1,11 +1,14 @@
 package entity;
 
+import dao.UserNotificationDAO;
+import observer.Observer;
+
 import javax.persistence.*;
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "\"User\"")
-public class User {
+public class User implements Observer {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq_gen")
     @SequenceGenerator(name = "user_seq_gen", sequenceName = "user_seq", allocationSize = 1)
@@ -58,6 +61,14 @@ public class User {
         this.approvalDate = approvalDate;
         this.registerForm = registerForm;
         this.role = role;
+    }
+
+
+    @Override
+    public void update(Notification notification) {
+        UserNotificationDAO un = new UserNotificationDAO();
+        UserNotification userNotification = new UserNotification(this, notification, false);
+        un.saveOrUpdate(userNotification);
     }
 
     public int getUserId() {

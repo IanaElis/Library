@@ -2,13 +2,16 @@ package controllers;
 
 import dao.BookStatusDAO;
 import entity.Book;
+import entity.User;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
+import org.apache.logging.log4j.Logger;
 import services.BookService;
+import util.LoggerUtil;
 
 import java.time.LocalDate;
 
@@ -34,8 +37,11 @@ public class AddBookController {
     private AlertMessage alert = new AlertMessage();
     private BookStatusDAO bookStatusDAO = new BookStatusDAO();
     private BookService bookService = new BookService();
+    private static final Logger logger = LoggerUtil.getLogger();
+    private User loggedUser;
 
-    public AddBookController() {
+    public void setLoggedUser(User user) {
+        this.loggedUser = user;
     }
 
     public void initialize() {
@@ -53,20 +59,34 @@ public class AddBookController {
         String total_q = this.total_q.getText();
         String av_q = this.av_q.getText();
         String publisher = this.publisher.getText();
-        Book book = null;
 
         if(isbn == null || title == null || author == null || genre == null
                 || year == null || total_q == null || av_q == null || publisher == null) {
             alert.emptyAlertMessage("Please fill in the fields");
         }
         else {
-            book = new Book(isbn, title, author, genre, year,
+            int parsedTotalQ = 0;
+            int parsedAvQ = 0;
+            try {
+                parsedTotalQ = Integer.parseInt(total_q);
+                parsedAvQ = Integer.parseInt(av_q);
+            } catch (NumberFormatException e) {
+                alert.emptyAlertMessage("Invalid number format");
+            }
+
+            Book book = new Book(isbn, title, author, genre, year,
                     bookStatusDAO.getBookStatus(2),
-                    Integer.parseInt(total_q), Integer.parseInt(av_q), publisher);
+                    parsedTotalQ, parsedAvQ, publisher);
 
             String s = bookService.addBook(book);
-            if (s.contains("added")) alert.successMessage(s, "Success");
-            else alert.emptyAlertMessage(s);
+            if (s.contains("added")) {
+                alert.successMessage(s, "Success");
+                logger.info("User {} added a new book \"{}\"(ISBN: {})",
+                        loggedUser.getEmail(), book.getTitle(), book.getIsbn());
+            }
+            else {
+                alert.emptyAlertMessage(s);
+            }
         }
     }
 }
