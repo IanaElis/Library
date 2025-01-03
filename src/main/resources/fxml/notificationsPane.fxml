@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane id="notifications" fx:id="notifications_form" prefHeight="460.0" prefWidth="680.0" style="-fx-background-color: #DDD9CA;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.NotificationsPaneController">
+   <children>
+      <ScrollPane layoutX="171.0" layoutY="7.0" prefHeight="446.0" prefWidth="503.0" AnchorPane.leftAnchor="115.0">
+        <content>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0" />
+        </content>
+      </ScrollPane>
+      <VBox fx:id="notificationsPane" layoutX="175.0" layoutY="14.0" prefHeight="433.0" prefWidth="474.0" AnchorPane.leftAnchor="120.0" />
+   </children>
+</AnchorPane>

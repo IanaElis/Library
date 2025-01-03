@@ -1,11 +1,9 @@
 package services;
 
-import dao.BookDAO;
-import dao.BorrowingDAO;
-import dao.BorrowingStatusDAO;
-import dao.UserDAO;
+import dao.*;
 import entity.Book;
 import entity.Borrowing;
+import entity.Notification;
 import entity.User;
 
 import java.time.LocalDate;
@@ -17,6 +15,8 @@ public class BorrowingService {
     private BorrowingDAO borrowingDAO;
     private BorrowingStatusDAO borrowingStatusDAO;
     private BookService bookService;
+    private NotificationService notificationService;
+    private NotificationDAO notificationDAO;
 
     public BorrowingService() {
         userDAO = new UserDAO();
@@ -24,6 +24,8 @@ public class BorrowingService {
         borrowingDAO = new BorrowingDAO();
         borrowingStatusDAO = new BorrowingStatusDAO();
         bookService = new BookService();
+        notificationService = new NotificationService();
+        notificationDAO = new NotificationDAO();
     }
 
     public String issueBook(int bookId, int userId) {
@@ -62,15 +64,8 @@ public class BorrowingService {
                 book.setAvailableQuantity(book.getAvailableQuantity() - 1);
                 borrowing.setDamaged(true);
                 bookService.deleteBook(book);
-                //is damaged to Borrowing, not BOOK
                 s = "Damaged book was written off";
 
-            }
-            else if(borrowing.getExpectedReturnDate().isBefore(LocalDate.now())) {
-                //borrowing.getBook().getStatus().getId() == 3
-                borrowing.setStatus(borrowingStatusDAO.getBorrowingStatusById(3));
-                s = "Book is overdue";
-                //ranking value decrease
             }
             else s = "Book returned successfully";
 
@@ -86,8 +81,27 @@ public class BorrowingService {
         return borrowingDAO.getActualBorrowingsByReader(userId);
     }
 
-
     public List<Borrowing> getAllBorrowingsByUser(int userId) {
         return borrowingDAO.getAllBorrowingsByReader(userId);
+    }
+
+    public void checkForOverdue(User user){
+        List<Borrowing> borrowingList = borrowingDAO.getAllBorrowingsByReader(user.getUserId());
+        for(Borrowing b : borrowingList){
+            if(b.getExpectedReturnDate().isBefore(LocalDate.now())){
+                if(b.getStatus().getBorStatId() != 3){
+                    b.setStatus(borrowingStatusDAO.getBorrowingStatusById(3));
+                    borrowingDAO.saveOrUpdate(b);
+                }
+            }
+        }
+        int number = borrowingDAO.numberBorrowingsOverdue(user);
+        if(number != 0) {
+            Notification ntfc = new Notification("You have "
+                    + number + " borrowed books that you haven't returned on time",
+                    LocalDate.now(), false);
+            notificationDAO.saveOrUpdate(ntfc);
+            notificationService.notifySpecificReader(ntfc, user);
+        }
     }
 }

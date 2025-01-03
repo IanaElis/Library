@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane id="readers" fx:id="readers_form" prefHeight="460.0" prefWidth="680.0" style="-fx-background-color: #DDD9CA;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ReadersPaneController">
+   <children>
+      <TableView fx:id="readers_table" layoutX="32.0" layoutY="64.33333333333334" prefHeight="179.0" prefWidth="619.0" AnchorPane.leftAnchor="32.0" AnchorPane.rightAnchor="29.33333333333337" AnchorPane.topAnchor="64.33333333333334">
+         <columns>
+            <TableColumn fx:id="readers_id" prefWidth="62.66667175292969" text="Reader ID" />
+            <TableColumn fx:id="readers_email" prefWidth="82.0" text="Email" />
+            <TableColumn fx:id="readers_name" prefWidth="93.99993896484375" text="Full Name" />
+            <TableColumn fx:id="readers_number" prefWidth="93.33340454101562" text="Phone Number" />
+            <TableColumn fx:id="readers_date" prefWidth="82.6666259765625" text="Approval Date" />
+            <TableColumn fx:id="readers_borBooksNum" prefWidth="70.6666259765625" text="Number of B. Books" />
+            <TableColumn fx:id="button" prefWidth="70.6666259765625" text="Buttons(Update,Delete)" />
+         </columns>
+         <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+         </columnResizePolicy>
+      </TableView>
+      <TableView fx:id="borBooks_table" layoutX="32.0" layoutY="257.0" prefHeight="190.0" prefWidth="617.0" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="32.0" AnchorPane.rightAnchor="28.66666666666663" AnchorPane.topAnchor="260.0">
+         <columns>
+            <TableColumn fx:id="borBooks_id" prefWidth="81.99998474121094" text="Book ID" />
+            <TableColumn fx:id="borBooks_title" prefWidth="83.33334350585938" text="Title" />
+            <TableColumn fx:id="borBooks_author" prefWidth="80.66671752929688" text="Author" />
+            <TableColumn fx:id="borBooks_dateOfB" prefWidth="76.66671752929688" text="Date of B" />
+            <TableColumn fx:id="borBooks_expDateOfRet" prefWidth="86.66668701171875" text="Expected date" />
+            <TableColumn fx:id="borBooks_actualDate" prefWidth="102.0" text="Actual R.Date" />
+            <TableColumn fx:id="borBooks_borStatus" prefWidth="101.99995930989587" text="Status" />
+         </columns>
+         <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+         </columnResizePolicy>
+      </TableView>
+      <Button fx:id="return_btn" layoutX="32.333333333333336" layoutY="456.0" mnemonicParsing="false" onAction="#returnBook" prefHeight="25.0" prefWidth="129.0" text="Return book" AnchorPane.bottomAnchor="18.666666666666686" AnchorPane.leftAnchor="32.333333333333336" />
+      <Button layoutX="33.0" layoutY="28.0" mnemonicParsing="false" onAction="#addReaderManually" prefHeight="25.0" prefWidth="147.0" text="Add new reader" />
+      <Button layoutX="200.0" layoutY="28.0" mnemonicParsing="false" onAction="#deleteReader" prefHeight="25.0" prefWidth="111.0" text="Delete reader" />
+   </children>
+</AnchorPane>

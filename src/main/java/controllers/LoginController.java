@@ -13,7 +13,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.PasswordField;
@@ -21,7 +20,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.util.Pair;
+import org.apache.logging.log4j.Logger;
 import services.UserService;
+import util.LoggerUtil;
 
 public class LoginController  {
     @FXML
@@ -31,16 +32,11 @@ public class LoginController  {
     @FXML
     private AnchorPane login_form;
     @FXML
-    private Button login_loginBtn;
-    @FXML
     private PasswordField login_password;
     @FXML
     private Hyperlink login_registerLink;
     @FXML
     private TextField login_showPass;
-
-    @FXML
-    private AnchorPane main_form;
 
     @FXML
     private CheckBox register_checkBx;
@@ -57,12 +53,11 @@ public class LoginController  {
     @FXML
     private TextField register_phone_number;
     @FXML
-    private Button register_regBtn;
-    @FXML
     private TextField register_showPass;
 
     private AlertMessage alert = new AlertMessage();
     private UserService userService = new UserService();
+    private static final Logger logger = LoggerUtil.getLogger();
 
     public void switchForm(ActionEvent event) {
         if(event.getSource() == login_registerLink) {
@@ -126,6 +121,7 @@ public class LoginController  {
                 }
                 else {
                     alert.emptyAlertMessage(result.getValue());
+                    logger.warn("Failed login attempt with message {}", result.getValue());
                     return;
                 }
             }
@@ -152,6 +148,7 @@ public class LoginController  {
 
         if(fxmlFile == null){
             alert.emptyAlertMessage("Unexpected role id");
+            logger.error("The role id value not found in the db. Not able to load dashboard");
             return;
         }
 
@@ -163,6 +160,7 @@ public class LoginController  {
         if(user.getRole().getRoleID() == 1){
             ReaderController reader = loader.getController();
             reader.setLoggedUser(user);
+            reader.getDefaultPane();
         }
         if(user.getRole().getRoleID() == 2){
             OperatorController operator = loader.getController();
@@ -171,10 +169,14 @@ public class LoginController  {
         if(user.getRole().getRoleID() == 3) {
             AdminController admin = loader.getController();
             admin.setLoggedUser(user);
+            admin.showDashboard();
         }
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         stage.setScene(new Scene(root));
         stage.show();
+        logger.info("User {} logged in successfully", user.getEmail());
+        NotificationsPaneController controller = new NotificationsPaneController();
+        controller.showUnreadNotificationsAlert(user.getUserId());
     }
 
     public void handleRegister() {
@@ -202,6 +204,7 @@ public class LoginController  {
             if (userService.registerUser(form)) {
                 alert.successMessage("Registration successful! Pending " +
                         " approval", "Congratulations!");
+                logger.info("Registration form with ID {} created successfully", form.getRegFormId());
                 switchForm(new ActionEvent(register_loginLink, null));
             }
             else alert.emptyAlertMessage("Registration failed. " +
