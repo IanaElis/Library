@@ -1,11 +1,11 @@
 package controllers;
 
-import dao.UserDAO;
 import entity.User;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import util.LoggerUtil;
+import services.UserService;
 
 public class ProfilePaneController {
 
@@ -15,10 +15,14 @@ public class ProfilePaneController {
     private TextField name;
     @FXML
     private TextField number;
-    private AlertMessage alert = new AlertMessage();
-    private UserDAO userDAO = new UserDAO();
-    private static final Logger logger = LoggerUtil.getLogger();
+    private final AlertMessage alert = new AlertMessage();
+    private UserService userService;
+    private static final Logger logger = LogManager.getLogger(ProfilePaneController.class);
     private User loggedUser;
+
+    public void setParam(UserService us){
+        userService = us;
+    }
 
     public void setLoggedUser(User user) {
         this.loggedUser = user;
@@ -41,7 +45,7 @@ public class ProfilePaneController {
                 loggedUser.setEmail(email);
                 loggedUser.setName(name);
                 loggedUser.setPhoneNumber(parsedNumber);
-                userDAO.saveOrUpdate(loggedUser);
+                userService.saveOrUpdate(loggedUser);
                 logger.info("User {} changed personal information", loggedUser.getEmail());
             }
             else alert.emptyAlertMessage("Please fill in missing information");

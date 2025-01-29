@@ -1,29 +1,42 @@
 package controllers;
 
+import entity.Book;
 import entity.RegisterForm;
 import entity.User;
 import entity.UserNotification;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import services.BookService;
 import services.NotificationService;
 import services.UserService;
-import util.LoggerUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.logging.log4j.Logger;
 
 public class NotificationsPaneController {
     @FXML
     private VBox notificationsPane;
+    @FXML
+    private ScrollPane scrollPane;
+    private static final Logger logger = LogManager.getLogger(NotificationsPaneController.class);
 
-    private final NotificationService notificationService = new NotificationService();
-    private UserService userService = new UserService();
-    private AlertMessage alert = new AlertMessage();
+    private NotificationService notificationService;
+    private BookService bookService;
+    private UserService userService;
+    private final AlertMessage alert = new AlertMessage();
     List<UserNotification> list = new ArrayList<>();
+
+    public void setParam(UserService us, BookService bs, NotificationService ns){
+        userService = us;
+        bookService = bs;
+        notificationService = ns;
+    }
 
     public void showUnreadNotificationsAlert(int currentUserId) {
         int unreadCount = notificationService.getUnreadNotificationCount(currentUserId);
@@ -36,9 +49,9 @@ public class NotificationsPaneController {
         notificationService.markNotificationsAsRead(currentUserId);
     }
 
-    public void showNotifications(int currentUserId) {
+    public void showNotifications(User currentUser) {
         notificationsPane.getChildren().clear();
-        list = notificationService.getNotificationsByUser(currentUserId);
+        list = notificationService.getNotificationsByUser(currentUser.getUserId());
         for(UserNotification userNotification : list) {
             VBox notificationBox = new VBox();
             notificationBox.setSpacing(10);
@@ -53,8 +66,7 @@ public class NotificationsPaneController {
             notificationBox.getChildren().add(contentBox);
 
             if (userNotification.getNotification().getNotifID() == 1) {
-                String email = userNotification.getNotification().getAdditionalInfo();
-                String result = this.getEmail(email);
+                String result = userNotification.getAdditionalInfo();
 
                 if(result != null) {
                     RegisterForm userToAdd = userService.getRegFormByEmail(result);
@@ -70,17 +82,30 @@ public class NotificationsPaneController {
 
                     Button approveButton = new Button("Approve");
                     Button denyButton = new Button("Deny");
-                    approveButton.setOnAction(event -> userService.approveReader(userToAdd));
+                    approveButton.setOnAction(event -> {
+                        boolean res = userService.approveReader(userToAdd);
+                        if(!res) {
+                            alert.emptyAlertMessage("User already denied");
+                            logger.warn("User with register form {} has been denied registration", userToAdd.getRegFormId());
+                        }
+                        else logger.info("User {} created successfully by {} {}",
+                                userToAdd.getEmail(), currentUser.getRole().getName(), currentUser.getEmail());
+                    });
                     denyButton.setOnAction(event -> {
                         userService.denyReader(userToAdd);
-                        if(!userService.denyReader(userToAdd))
+                        if(!userService.denyReader(userToAdd)) {
                             alert.emptyAlertMessage("User already approved");
+                            logger.info("User {} has already been approved", userToAdd.getEmail());
+                        }
+                        else logger.info("User {} denied by {} {}",
+                                userToAdd.getEmail(), currentUser.getRole().getName(), currentUser.getEmail());
                     });
 
                     if(userNotification.isRead()){
-                        messageLabel.setStyle("-fx-text-fill: #cfc5c5;");
-                        infoLabel.setStyle("-fx-text-fill: #cfc5c5; -fx-alignment: center;");
-                        if(userToAdd.getStatus().getRegStatId() == 2){
+                      //  messageLabel.setStyle("-fx-text-fill: #cfc5c5;");
+                        if(userToAdd.getStatus().getRegStatId() == 2 ||
+                                userToAdd.getStatus().getRegStatId() == 3){
+                            infoLabel.setStyle("-fx-text-fill: #cfc5c5; -fx-alignment: center;");
                             approveButton.setDisable(true);
                             denyButton.setDisable(true);
                         }
@@ -93,21 +118,24 @@ public class NotificationsPaneController {
                     notificationBox.getChildren().add(buttonBox);
                 }
             }
+            else if(userNotification.getNotification().getNotifID() == 3){
+                List<Book> books = bookService.booksToArchive();
+                for(Book book : books) {
+                    Label bookLabel = new Label("\nISBN: " + book.getIsbn() +
+                            "Book ID: " + book.getId());
+                    bookLabel.setWrapText(true);
+                    contentBox = new VBox(bookLabel);
+                    contentBox.setSpacing(30);
+                    notificationBox.getChildren().add(contentBox);
+                }
+            }
+
+            if(userNotification.isRead()){
+                messageLabel.setStyle("-fx-text-fill: #cfc5c5;");
+            }
             notificationsPane.getChildren().add(notificationBox);
         }
+        scrollPane.setContent(notificationsPane);
     }
 
-    public String getEmail(String input) {
-        String keyword = "email: ";
-        int startIndex = input.indexOf(keyword);
-        if (startIndex != -1) {
-            startIndex += keyword.length();
-            int endIndex = input.indexOf(' ', startIndex);
-            if (endIndex == -1) {
-                endIndex = input.length();
-            }
-            return input.substring(startIndex, endIndex);
-        }
-        return null;
-    }
 }

@@ -12,10 +12,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NotificationService {
-    private UserNotificationDAO userNotificationDAO = new UserNotificationDAO();
-    private NotificationDAO notificationDAO = new NotificationDAO();
-    private UserDAO userDAO = new UserDAO();
+    private final UserNotificationDAO userNotificationDAO;
+    private final NotificationDAO notificationDAO;
+    private final UserDAO userDAO;
     private final List<Observer> observers = new ArrayList<>();
+
+    public NotificationService(UserNotificationDAO und, NotificationDAO nd, UserDAO us) {
+        userNotificationDAO = und;
+        notificationDAO = nd;
+        userDAO = us;
+    }
 
     public void addObserver(Observer observer) {
         observers.add(observer);
@@ -25,22 +31,22 @@ public class NotificationService {
         observers.remove(observer);
     }
 
-    public void notifyAdminsOperators(Notification notification) {
+    public void notifyAdminsOperators(Notification notification, String email) {
         observers.clear();
         List<User> obs = userDAO.getAllOperators();
         obs.addAll(userDAO.getAllAdmins());
         observers.addAll(obs);
         for (Observer observer : observers) {
-            observer.update(notification);
+            observer.update(notification, email);
         }
     }
 
-    public void notifyReaders(Notification notification) {
+    public void notifyReaders(Notification notification, String email) {
         observers.clear();
         List<User> readers = userDAO.getAllReaders();
         observers.addAll(readers);
         for (Observer observer : observers) {
-            observer.update(notification);
+            observer.update(notification, email);
         }
     }
 
@@ -49,7 +55,7 @@ public class NotificationService {
         User u = userDAO.getUserByEmail(user.getEmail());
         addObserver(u);
         for (Observer observer : observers) {
-            observer.update(notification);
+            observer.update(notification, null);
         }
     }
 

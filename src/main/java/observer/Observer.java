@@ -3,5 +3,5 @@ package observer;
 import entity.Notification;
 
 public interface Observer {
-    void update(Notification notification);
+    void update(Notification notification, String email);
 }

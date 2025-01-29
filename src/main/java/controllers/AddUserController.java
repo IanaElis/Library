@@ -1,13 +1,12 @@
 package controllers;
 
-import dao.RoleDAO;
 import entity.User;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import services.UserService;
-import util.LoggerUtil;
 import util.PasswordUtil;
 
 import java.time.LocalDate;
@@ -23,11 +22,14 @@ public class AddUserController {
     private TextField password;
 
     private AnchorPane rootPane;
-    private AlertMessage alert = new AlertMessage();
-    private RoleDAO roleDAO = new RoleDAO();
-    private UserService userService = new UserService();
-    private static final Logger logger = LoggerUtil.getLogger();
+    private final AlertMessage alert = new AlertMessage();
+    private UserService userService;
+    private static final Logger logger = LogManager.getLogger(AddUserController.class);
     private User loggedUser;
+
+    public void setParam(UserService us){
+        userService = us;
+    }
 
     public void setLoggedUser(User user) {
         this.loggedUser = user;
@@ -38,6 +40,7 @@ public class AddUserController {
     }
 
     public void addUser() {
+
         if(rootPane!=null) {
             String email = this.email.getText();
             String name = this.name.getText();
@@ -56,14 +59,15 @@ public class AddUserController {
                     alert.emptyAlertMessage("Invalid phone number format");
                 }
 
-                User newUser = new User(email, password, name, parsedNumber,
+                String hashedPass = PasswordUtil.hashPassword(password);
+                User newUser = new User(email, hashedPass, name, parsedNumber,
                         LocalDate.now(),null,null);
                 String role = "";
                 if (rootPane.getId() != null && rootPane.getId().contains("readers")) {
-                    newUser.setRole(roleDAO.getRoleById(1));
+                    newUser.setRole(userService.getRole(1));
                     role = "reader";
                 } else if (rootPane.getId() != null && rootPane.getId().contains("operators")) {
-                    newUser.setRole(roleDAO.getRoleById(2));
+                    newUser.setRole(userService.getRole(2));
                     role = "operator";
                 }
 

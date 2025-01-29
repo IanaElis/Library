@@ -5,7 +5,7 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane id="readers" fx:id="readers_form" prefHeight="460.0" prefWidth="680.0" style="-fx-background-color: #DDD9CA;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ReadersPaneController">
+<AnchorPane id="readers" fx:id="readers_form" prefHeight="460.0" prefWidth="680.0" style="-fx-background-color: #DDD9CA;" xmlns="http://javafx.com/javafx/17.0.13" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ReadersPaneController">
    <children>
       <TableView fx:id="readers_table" layoutX="32.0" layoutY="64.33333333333334" prefHeight="179.0" prefWidth="619.0" AnchorPane.leftAnchor="32.0" AnchorPane.rightAnchor="29.33333333333337" AnchorPane.topAnchor="64.33333333333334">
          <columns>
@@ -37,6 +37,6 @@
       </TableView>
       <Button fx:id="return_btn" layoutX="32.333333333333336" layoutY="456.0" mnemonicParsing="false" onAction="#returnBook" prefHeight="25.0" prefWidth="129.0" text="Return book" AnchorPane.bottomAnchor="18.666666666666686" AnchorPane.leftAnchor="32.333333333333336" />
       <Button layoutX="33.0" layoutY="28.0" mnemonicParsing="false" onAction="#addReaderManually" prefHeight="25.0" prefWidth="147.0" text="Add new reader" />
-      <Button layoutX="200.0" layoutY="28.0" mnemonicParsing="false" onAction="#deleteReader" prefHeight="25.0" prefWidth="111.0" text="Delete reader" />
+      <Button fx:id="deleteReader_btn" layoutX="200.0" layoutY="28.0" mnemonicParsing="false" onAction="#deleteReader" prefHeight="25.0" prefWidth="111.0" text="Delete reader" />
    </children>
 </AnchorPane>

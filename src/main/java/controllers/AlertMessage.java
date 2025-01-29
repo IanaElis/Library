@@ -8,6 +8,10 @@ import java.util.Optional;
 public class AlertMessage {
     private Alert alert;
 
+    public Alert getAlert() {
+        return alert;
+    }
+
     public void emptyAlertMessage(String message) {
         alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");

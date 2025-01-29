@@ -5,7 +5,6 @@ import entity.User;
 import org.hibernate.Session;
 import util.HibernateUtil;
 
-import javax.persistence.NoResultException;
 import java.util.List;
 
 public class BorrowingDAO extends BaseDAO<Borrowing> {
@@ -19,6 +18,12 @@ public class BorrowingDAO extends BaseDAO<Borrowing> {
     public List<Borrowing> getAllBorrowings() {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.createQuery("from Borrowing", Borrowing.class).list();
+        }
+    }
+
+    public int countAllOverdue() {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery("FROM Borrowing WHERE status.id = 3", Borrowing.class).list().size();
         }
     }
 
@@ -47,24 +52,24 @@ public class BorrowingDAO extends BaseDAO<Borrowing> {
         }
     }
 
+    public List<Borrowing> getOverdueBorrowingsByReader(int userId) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery("from Borrowing WHERE user.userId =: id AND expectedReturnDate <= CURRENT_DATE", Borrowing.class)
+                    .setParameter("id", userId)
+                    .list();
+        }
+    }
+
     public boolean isBookAlreadyBorrowedByUser(int userId, int bookId){
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            try {
+        //    try {
                 List<Borrowing> b = session.createQuery("from Borrowing WHERE " +
-                                "user.userId =: id AND book.id =: bookId ", Borrowing.class)
+                                "user.userId =: id AND book.id =: bookId AND book.status.id != 2", Borrowing.class)
                         .setParameter("id", userId)
                         .setParameter("bookId", bookId).list();
-                System.out.println(b.size());
-                System.out.println("b list res from db" + b);
-                if(b.size() == 0){
+                if(b == null || b.isEmpty())
                     return false;
-                }
-                return true;
-            }
-            catch(NoResultException e) {
-                return false;
-            }
-
+                else return true;
         }
     }
 
@@ -74,6 +79,33 @@ public class BorrowingDAO extends BaseDAO<Borrowing> {
                     .setParameter("id", user.getUserId())
                     .list();
             return b.size();
+        }
+    }
+
+    public int getBorrowedBooksCountByUser(int userId){
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery("FROM Borrowing WHERE user.id =: id AND " +
+                    "status.id != 3", Borrowing.class)
+                    .setParameter("id", userId)
+                    .list().size();
+        }
+    }
+
+    public int getLateReturnCountByUser(int userId){
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery("FROM Borrowing WHERE user.id =: id AND " +
+                            "status.id = 3", Borrowing.class)
+                    .setParameter("id", userId)
+                    .list().size();
+        }
+    }
+
+    public int getDamagedBooksCountByUser(int userId){
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery("FROM Borrowing WHERE user.id =: id AND " +
+                            "isDamaged = true", Borrowing.class)
+                    .setParameter("id", userId)
+                    .list().size();
         }
     }
 }

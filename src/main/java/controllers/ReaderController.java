@@ -3,7 +3,6 @@ package controllers;
 import entity.Book;
 import entity.Borrowing;
 import entity.User;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -16,11 +15,13 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-import services.BookService;
-import services.BorrowingService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import services.*;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Objects;
 
 public class ReaderController {
     @FXML
@@ -60,7 +61,6 @@ public class ReaderController {
     @FXML
     private TableColumn<Book, LocalDate> year;
 
-
     @FXML
     private TableColumn<Borrowing, String> borBooks_author;
     @FXML
@@ -78,9 +78,14 @@ public class ReaderController {
     private Label username_label;
 
     private User loggedUser;
-    private BorrowingService borrowingService = new BorrowingService();
-    private BookService bookService = new BookService();
+
+    private final BookService bookService = ServicesDAOs.getBookService();
+    private final BorrowingService borrowingService = ServicesDAOs.getBorrowingService();
+    private final UserService userService = ServicesDAOs.getUserService();
+    private final NotificationService notificationService = ServicesDAOs.getNotificationService();
+
     private NotificationsPaneController notificationsPaneController;
+    private static final Logger logger = LogManager.getLogger(ReaderController.class);
 
     public void setLoggedUser(User user) {
         this.loggedUser = user;
@@ -97,8 +102,7 @@ public class ReaderController {
         showNotificationsPane();
     }
 
-
-    public void switchForm(ActionEvent event) throws IOException {
+    public void switchForm(ActionEvent event){
         if(event.getSource() == borrowedBooks_btn) {
             setFormsInvisible();
             borrowedBooks_form.setVisible(true);
@@ -112,7 +116,7 @@ public class ReaderController {
         else if(event.getSource() == notifications_btn) {
             setFormsInvisible();
             notifications_form.setVisible(true);
-            notificationsPaneController.showNotifications(loggedUser.getUserId());
+            notificationsPaneController.showNotifications(loggedUser);
             notificationsPaneController.markNotificationsAsRead(loggedUser.getUserId());
         }
         else if(event.getSource() == profile_btn) {
@@ -121,6 +125,7 @@ public class ReaderController {
         }
         else if(event.getSource() == exit_btn) {
             exit();
+            logger.info("User {} logged out", loggedUser.getEmail());
         }
     }
 
@@ -133,8 +138,7 @@ public class ReaderController {
 
     public void showName(){
         if(loggedUser != null) username_label.setText("Welcome, " + loggedUser.getName());
-        NotificationsPaneController controller = new NotificationsPaneController();
-        controller.showUnreadNotificationsAlert(loggedUser.getUserId());
+        notificationsPaneController.showUnreadNotificationsAlert(loggedUser.getUserId());
         booksOverdue(loggedUser);
     }
 
@@ -191,21 +195,31 @@ public class ReaderController {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/notificationsPane.fxml"));
         Parent notif = loader.load();
         notificationsPaneController = loader.getController();
+        notificationsPaneController.setParam(userService,bookService,notificationService);
         notifications_form.getChildren().setAll(notif);
 
     }
 
-    public void exit() throws IOException {
+    public void exit(){
         Stage stage = (Stage) exit_btn.getScene().getWindow();
         stage.close();
 
-        Parent root = FXMLLoader.load(getClass().getResource("/fxml/login.fxml"));
-        Scene scene = new Scene(root);
-        Stage primaryStage = new Stage();
-        primaryStage.setMinHeight(350);
-        primaryStage.setMinWidth(500);
-        primaryStage.setTitle("Library Information System");
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        try {
+            Parent root = FXMLLoader.load(Objects.requireNonNull(getClass()
+                    .getResource("/fxml/login.fxml")));
+            Scene scene = new Scene(root);
+            Stage primaryStage = new Stage();
+            primaryStage.setMinHeight(350);
+            primaryStage.setMinWidth(500);
+            primaryStage.setTitle("Library Information System");
+            primaryStage.setScene(scene);
+            primaryStage.show();
+        } catch (NullPointerException e) {
+            logger.error(e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        } catch (IOException e) {
+            logger.error("Error loading login screen", e);
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Font?>
 
-<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.AdminController">
+<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/17.0.13" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.AdminController">
    <children>
       <AnchorPane prefHeight="500.0" prefWidth="900.0">
          <children>
@@ -35,13 +35,13 @@
                <center>
                   <AnchorPane prefHeight="460.0" prefWidth="680.0" BorderPane.alignment="TOP_LEFT">
                      <children>
-                        <AnchorPane id="dashboard" fx:id="dashboard_form" layoutX="125.0" layoutY="53.0" prefHeight="460.0" prefWidth="680.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                          <fx:include fx:id="reports_form" source="reportsPane.fxml" />
                          <fx:include fx:id="operators_form" source="OperatorsPane.fxml" />
                          <fx:include fx:id="books_form" source="booksPane.fxml" />
                          <fx:include fx:id="readers_form" source="readersPane.fxml" />
                          <fx:include fx:id="profile_form" source="profilePane.fxml" />
                          <fx:include fx:id="notifications_form" source="notificationsPane.fxml" />
+                         <fx:include fx:id="dashboard_form" source="mainPage.fxml" />
                      </children></AnchorPane>
                </center>
             </BorderPane>

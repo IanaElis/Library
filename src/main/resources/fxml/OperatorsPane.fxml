@@ -5,16 +5,15 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane id="operators" fx:id="operators_form" prefHeight="460.0" prefWidth="680.0" style="-fx-background-color: #DDD9CA;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.OperatorsPaneController">
+<AnchorPane id="operators" fx:id="operators_form" prefHeight="460.0" prefWidth="680.0" style="-fx-background-color: #DDD9CA;" xmlns="http://javafx.com/javafx/17.0.13" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.OperatorsPaneController">
    <children>
-      <TableView fx:id="operators_table" layoutX="31.0" layoutY="96.0" prefHeight="282.0" prefWidth="615.0" AnchorPane.bottomAnchor="122.0" AnchorPane.leftAnchor="31.333333333333258" AnchorPane.rightAnchor="33.66666666666663" AnchorPane.topAnchor="96.0">
+      <TableView fx:id="operators_table" layoutX="31.0" layoutY="96.0" AnchorPane.bottomAnchor="120.66666666666666" AnchorPane.leftAnchor="31.0" AnchorPane.rightAnchor="54.66666666666663" AnchorPane.topAnchor="96.0">
          <columns>
             <TableColumn fx:id="operators_col_id" prefWidth="28.0" resizable="false" text="ID" />
             <TableColumn fx:id="operators_col_email" prefWidth="138.6666316986084" text="Email" />
             <TableColumn fx:id="operators_col_name" prefWidth="130.66664123535156" text="Full Name" />
             <TableColumn fx:id="operators_col_number" prefWidth="128.0" text="Phone Number" />
             <TableColumn fx:id="operators_col_date" prefWidth="92.66671752929688" text="Approval Date" />
-            <TableColumn prefWidth="94.0" text="Buttons(Update,Delete)" />
          </columns>
          <columnResizePolicy>
             <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

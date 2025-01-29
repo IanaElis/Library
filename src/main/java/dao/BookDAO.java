@@ -26,4 +26,10 @@ public class BookDAO extends BaseDAO<Book> {
             return session.createQuery("from Book", Book.class).list();
         }
     }
+
+    public int countAllBooks() {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery("from Book", Book.class).list().size();
+        }
+    }
 }

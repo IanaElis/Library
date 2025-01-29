@@ -2,17 +2,30 @@ package services;
 
 import dao.BookDAO;
 import dao.BookStatusDAO;
-import dao.BorrowingDAO;
 import entity.Book;
+import entity.BookStatus;
+import entity.Notification;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 public class BookService {
-    private BookDAO bookDAO;
+    private final BookDAO bookDAO;
+    private final BookStatusDAO bookStatusDAO;
+    private final NotificationService notificationService;
+    private static final Logger logger = LogManager.getLogger(BookService.class);
 
-    public BookService() {
-        bookDAO = new BookDAO();
+    public BookService(BookDAO bd, BookStatusDAO bsd, NotificationService ns) {
+        bookDAO = bd;
+        bookStatusDAO = bsd;
+        notificationService = ns;
+    }
+
+    public BookStatus getBookStatus(int id) {
+        return bookStatusDAO.getBookStatus(id);
     }
 
     public String addBook(Book book) {
@@ -21,11 +34,10 @@ public class BookService {
             return "Book added";
         }
         else return "Book already exists";
-
     }
 
     public String archiveBook(Book book) {
-        String s = null;
+        String s;
         if( book!= null) {
             if(book.getStatus().getId() != 1){
                 LocalDate date = LocalDate.now();
@@ -36,7 +48,7 @@ public class BookService {
                 }
                 else{
                     s = "The book must be 40+ years old to be archived";
-                    //rise alert and ask if the user wants to proceed
+                    //raise alert and ask if the user wants to proceed
                     //if yes then go to method "archiveYoungBook"
                 }
             }
@@ -57,7 +69,7 @@ public class BookService {
             bookDAO.saveOrUpdate(book);
         }
         else{
-            System.out.println("Book is null");
+            logger.error("The book cannot be updated because it is null");
         }
     }
 
@@ -68,12 +80,44 @@ public class BookService {
             bookDAO.saveOrUpdate(book);
         }
         else{
-            System.out.println("Book is null");
+            logger.error("The book cannot be updated because it is null");
         }
     }
 
     public List<Book> getAllBooks() {
         return bookDAO.getAllBooks();
+    }
+
+    public void needToArchive() {
+        List<Book> books = this.getAllBooks();
+        boolean needToArchive = false;
+        LocalDate date = LocalDate.now();
+        for(Book book : books) {
+            if ((date.getYear() - book.getYear().getYear()) > 40 && book.getStatus().getId() == 2) {
+                needToArchive = true;
+                break;
+            }
+        }
+        if(needToArchive) {
+            Notification ntfc = notificationService.getNotificationById(3);
+            notificationService.notifyAdminsOperators(ntfc, null);
+        }
+    }
+
+    public List<Book> booksToArchive() {
+        List<Book> books = this.getAllBooks();
+        List<Book> toBeArchived = new ArrayList<>();
+        LocalDate date = LocalDate.now();
+        for(Book book : books) {
+            if((date.getYear() - book.getYear().getYear()) > 40 && book.getStatus().getId() == 2){
+                toBeArchived.add(book);
+            }
+        }
+        return toBeArchived;
+    }
+
+    public int countAllBooks(){
+        return bookDAO.countAllBooks();
     }
 
 }

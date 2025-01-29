@@ -15,9 +15,9 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.util.converter.IntegerStringConverter;
 import javafx.util.converter.LocalDateStringConverter;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import services.UserService;
-import util.LoggerUtil;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -39,11 +39,15 @@ public class OperatorsPaneController {
     @FXML
     private TableColumn<User, Integer> operators_col_number;
 
-    private UserService userService = new UserService();
-    private AlertMessage alert = new AlertMessage();
+    private UserService userService;
+    private final AlertMessage alert = new AlertMessage();
     private ObservableList<User> operators;
-    private static final Logger logger = LoggerUtil.getLogger();
+    private static final Logger logger = LogManager.getLogger(OperatorsPaneController.class);
     private User loggedUser;
+
+    public void setParam(UserService us){
+        userService = us;
+    }
 
     public void setLoggedUser(User user) {
         this.loggedUser = user;
@@ -79,6 +83,7 @@ public class OperatorsPaneController {
         Parent root = loader.load();
 
         AddUserController controller = loader.getController();
+        controller.setParam(userService);
         controller.setParentPane(operators_form);
         controller.setLoggedUser(loggedUser);
 

@@ -9,8 +9,12 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import services.*;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public class AdminController {
     @FXML
@@ -50,6 +54,11 @@ public class AdminController {
 
     private User loggedUser;
 
+    private final BookService bookService = ServicesDAOs.getBookService();
+    private final BorrowingService borrowingService = ServicesDAOs.getBorrowingService();
+    private final UserService userService = ServicesDAOs.getUserService();
+    private final UserRatingService userRatingService = ServicesDAOs.getUserRatingService();
+    private final NotificationService notificationService = ServicesDAOs.getNotificationService();
 
     private OperatorsPaneController operatorsPaneController;
     private BooksPaneController booksPaneController;
@@ -57,11 +66,11 @@ public class AdminController {
     private NotificationsPaneController notificationsPaneController;
     private ReportsPaneController reportsPaneController;
     private ProfilePaneController profilePaneController;
-
-    public AdminController() {
-    }
+    private DefaultPageController defaultPageController;
+    private static final Logger logger = LogManager.getLogger(AdminController.class);
 
     public void initialize() throws IOException {
+        showDashboard();
         showOperatorsPane();
         showBooksPane();
         showReadersPane();
@@ -70,54 +79,59 @@ public class AdminController {
         showProfilePane();
     }
 
+    public void getDefaultPane(){
+        setFormsInvisible();
+        dashboard_form.setVisible(true);
+        defaultPageController.showStatistics();
+    }
+
     public void setLoggedUser(User user) {
         this.loggedUser = user;
         showName();
+        bookService.needToArchive();
     }
 
-    public void switchForm(ActionEvent event) throws IOException {
+    private void showForm(AnchorPane form){
+        setFormsInvisible();
+        form.setVisible(true);
+    }
+
+    public void switchForm(ActionEvent event){
         if(event.getSource() == dashboard_btn) {
-            setFormsInvisible();
-            dashboard_form.setVisible(true);
-            showDashboard();
+            showForm(dashboard_form);
+            defaultPageController.showStatistics();
         }
         else if(event.getSource() == operators_btn) {
-            setFormsInvisible();
-            operators_form.setVisible(true);
+            showForm(operators_form);
             operatorsPaneController.setLoggedUser(loggedUser);
             operatorsPaneController.showOperators();
-
         }
         else if(event.getSource() == readers_btn) {
-            setFormsInvisible();
-            readers_form.setVisible(true);
+            showForm(readers_form);
             readersPaneController.setLoggedUser(loggedUser);
             readersPaneController.showReadersAndBorBooks();
         }
         else if(event.getSource() == books_btn) {
-            setFormsInvisible();
-            books_form.setVisible(true);
+            showForm(books_form);
             booksPaneController.setLoggedUser(loggedUser);
             booksPaneController.showBooks();
         }
         else if(event.getSource() == notifications_btn) {
-            setFormsInvisible();
-            notifications_form.setVisible(true);
-            notificationsPaneController.showNotifications(loggedUser.getUserId());
+            showForm(notifications_form);
+            notificationsPaneController.showNotifications(loggedUser);
             notificationsPaneController.markNotificationsAsRead(loggedUser.getUserId());
         }
         else if(event.getSource() == reports_btn) {
-            setFormsInvisible();
-            reports_form.setVisible(true);
+            showForm(reports_form);
             reportsPaneController.setLoggedUser(loggedUser);
         }
         else if(event.getSource() == profile_btn) {
-            setFormsInvisible();
-            profile_form.setVisible(true);
+            showForm(profile_form);
             profilePaneController.setLoggedUser(loggedUser);
         }
         else if(event.getSource() == exit_btn) {
             exit();
+            logger.info("User {} logged out", loggedUser.getEmail());
         }
     }
 
@@ -135,15 +149,19 @@ public class AdminController {
         if(loggedUser != null) username_label.setText("Welcome, " + loggedUser.getName());
     }
 
-    public void showDashboard(){
-
+    public void showDashboard() throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/mainPage.fxml"));
+        Parent main = loader.load();
+        defaultPageController = loader.getController();
+        defaultPageController.setParam(borrowingService, bookService, userService);
+        dashboard_form.getChildren().setAll(main);
     }
-
 
     public void showOperatorsPane() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/OperatorsPane.fxml"));
         Parent operatorsPane= loader.load();
         operatorsPaneController = loader.getController();
+        operatorsPaneController.setParam(userService);
         operators_form.getChildren().setAll(operatorsPane);
     }
 
@@ -151,6 +169,7 @@ public class AdminController {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/booksPane.fxml"));
         Parent booksPane= loader.load();
         booksPaneController = loader.getController();
+        booksPaneController.setParam(bookService, borrowingService, userService);
         books_form.getChildren().setAll(booksPane);
     }
 
@@ -158,6 +177,7 @@ public class AdminController {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/readersPane.fxml"));
         Parent readersPane= loader.load();
         readersPaneController = loader.getController();
+        readersPaneController.setParam(userService, borrowingService);
         readers_form.getChildren().setAll(readersPane);
     }
 
@@ -165,6 +185,7 @@ public class AdminController {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/reportsPane.fxml"));
         Parent reportsPane = loader.load();
         reportsPaneController = loader.getController();
+        reportsPaneController.setParam(userService, bookService, borrowingService, userRatingService);
         reports_form.getChildren().setAll(reportsPane);
     }
 
@@ -172,6 +193,7 @@ public class AdminController {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/notificationsPane.fxml"));
         Parent notif = loader.load();
         notificationsPaneController = loader.getController();
+        notificationsPaneController.setParam(userService, bookService, notificationService);
         notifications_form.getChildren().setAll(notif);
     }
 
@@ -179,21 +201,31 @@ public class AdminController {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/profilePane.fxml"));
         Parent profilePane = loader.load();
         profilePaneController = loader.getController();
+        profilePaneController.setParam(userService);
         profile_form.getChildren().setAll(profilePane);
     }
 
-    public void exit() throws IOException {
+    public void exit(){
         Stage stage = (Stage) exit_btn.getScene().getWindow();
         stage.close();
 
-        Parent root = FXMLLoader.load(getClass().getResource("/fxml/login.fxml"));
-        Scene scene = new Scene(root);
-        Stage primaryStage = new Stage();
-        primaryStage.setMinHeight(350);
-        primaryStage.setMinWidth(500);
-        primaryStage.setTitle("Library Information System");
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        try {
+            Parent root = FXMLLoader.load(Objects.requireNonNull(getClass()
+                    .getResource("/fxml/login.fxml")));
+            Scene scene = new Scene(root);
+            Stage primaryStage = new Stage();
+            primaryStage.setMinHeight(350);
+            primaryStage.setMinWidth(500);
+            primaryStage.setTitle("Library Information System");
+            primaryStage.setScene(scene);
+            primaryStage.show();
+        } catch (NullPointerException e) {
+            logger.error(e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        } catch (IOException e) {
+            logger.error("Error loading login screen", e);
+            throw new RuntimeException(e);
+        }
     }
 
 }

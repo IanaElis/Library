@@ -10,22 +10,21 @@ import java.time.LocalDate;
 import java.util.List;
 
 public class BorrowingService {
-    private UserDAO userDAO;
-    private BookDAO bookDAO;
-    private BorrowingDAO borrowingDAO;
-    private BorrowingStatusDAO borrowingStatusDAO;
-    private BookService bookService;
-    private NotificationService notificationService;
-    private NotificationDAO notificationDAO;
+    private final UserDAO userDAO;
+    private final BookDAO bookDAO;
+    private final BorrowingDAO borrowingDAO;
+    private final BorrowingStatusDAO borrowingStatusDAO;
+    private final BookService bookService;
+    private final NotificationService notificationService;
 
-    public BorrowingService() {
-        userDAO = new UserDAO();
-        bookDAO = new BookDAO();
-        borrowingDAO = new BorrowingDAO();
-        borrowingStatusDAO = new BorrowingStatusDAO();
-        bookService = new BookService();
-        notificationService = new NotificationService();
-        notificationDAO = new NotificationDAO();
+    public BorrowingService(UserDAO ud, BookDAO bd, BorrowingDAO brd, BorrowingStatusDAO bsd,
+                            BookService bs, NotificationService ns) {
+        userDAO = ud;
+        bookDAO = bd;
+        borrowingDAO = brd;
+        borrowingStatusDAO = bsd;
+        bookService = bs;
+        notificationService = ns;
     }
 
     public String issueBook(int bookId, int userId) {
@@ -77,31 +76,38 @@ public class BorrowingService {
         else return "Borrowing not found";
     }
 
-    public List<Borrowing> getActualBorrowingsByUser(int userId) {
-        return borrowingDAO.getActualBorrowingsByReader(userId);
-    }
-
     public List<Borrowing> getAllBorrowingsByUser(int userId) {
         return borrowingDAO.getAllBorrowingsByReader(userId);
     }
 
     public void checkForOverdue(User user){
-        List<Borrowing> borrowingList = borrowingDAO.getAllBorrowingsByReader(user.getUserId());
+        List<Borrowing> borrowingList = borrowingDAO.getOverdueBorrowingsByReader(user.getUserId());
         for(Borrowing b : borrowingList){
-            if(b.getExpectedReturnDate().isBefore(LocalDate.now())){
-                if(b.getStatus().getBorStatId() != 3){
-                    b.setStatus(borrowingStatusDAO.getBorrowingStatusById(3));
-                    borrowingDAO.saveOrUpdate(b);
-                }
+            if(b.getStatus().getBorStatId() != 3){
+                b.setStatus(borrowingStatusDAO.getBorrowingStatusById(3));
+                borrowingDAO.saveOrUpdate(b);
             }
         }
         int number = borrowingDAO.numberBorrowingsOverdue(user);
         if(number != 0) {
-            Notification ntfc = new Notification("You have "
-                    + number + " borrowed books that you haven't returned on time",
-                    LocalDate.now(), false);
-            notificationDAO.saveOrUpdate(ntfc);
+            Notification ntfc = notificationService.getNotificationById(2);
             notificationService.notifySpecificReader(ntfc, user);
         }
+    }
+
+    public int getBorrowedBooksCount(int userId) {
+        return borrowingDAO.getBorrowedBooksCountByUser(userId);
+    }
+
+    public int getLateReturnCount(int userId) {
+        return borrowingDAO.getLateReturnCountByUser(userId);
+    }
+
+    public int getDamagedBooksCount(int userId) {
+        return borrowingDAO.getDamagedBooksCountByUser(userId);
+    }
+
+    public int countAllOverdue(){
+        return borrowingDAO.countAllOverdue();
     }
 }

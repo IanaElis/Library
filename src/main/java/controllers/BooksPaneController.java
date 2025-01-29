@@ -12,17 +12,18 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 import javafx.util.converter.IntegerStringConverter;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import services.BookService;
 import services.BorrowingService;
 import services.UserService;
-import util.LoggerUtil;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -57,13 +58,19 @@ public class BooksPaneController {
     @FXML
     private Button issueBook_btn;
 
-    private BookService bookService = new BookService();
-    private BorrowingService borrowingService = new BorrowingService();
-    private UserService userService = new UserService();
-    private AlertMessage alert = new AlertMessage();
+    private BookService bookService;
+    private BorrowingService borrowingService;
+    private UserService userService;
+    private final AlertMessage alert = new AlertMessage();
     private ObservableList<Book> books;
-    private static final Logger logger = LoggerUtil.getLogger();
+    private static final Logger logger = LogManager.getLogger(BooksPaneController.class);
     private User loggedUser;
+
+    public void setParam(BookService bs, BorrowingService brs, UserService us){
+        bookService = bs;
+        borrowingService = brs;
+        userService = us;
+    }
 
     public void setLoggedUser(User user) {
         this.loggedUser = user;
@@ -95,6 +102,23 @@ public class BooksPaneController {
             book.setAvailableQuantity(event.getNewValue());
         });
 
+
+        books_table.setRowFactory(tv -> {
+            TableRow<Book> row = new TableRow<>();
+
+            row.itemProperty().addListener((obs, oldItem, newItem) -> {
+                if (newItem != null) {
+                    if ((LocalDate.now().getYear() - newItem.getYear().getYear()) > 40 && newItem.getStatus().getId() == 2) {
+                        row.setStyle("-fx-background-color: #fa9734;");
+                        row.setOpacity(0.8);
+                    } else {
+                        row.setStyle("");
+                    }
+                }
+            });
+            return row;
+        });
+
         books = FXCollections.observableArrayList();
         books_table.setItems(books);
     }
@@ -106,8 +130,10 @@ public class BooksPaneController {
     public void updateBook() {
         for (Book book : books_table.getItems()) {
             bookService.updateBook(book);
+            logger.warn("User {} updated the book \"{}\"(ISBN: {})", loggedUser.getEmail(), book.getTitle(),book.getIsbn());
         }
         alert.successMessage("Book updated", "Congrats!");
+
     }
 
     public void archiveBook(ActionEvent event) {
@@ -129,7 +155,7 @@ public class BooksPaneController {
                         "Do you want to archive this book?")){
                     bookService.archiveYoungBook(book);
                     alert.successMessage("The book is archived", "Success");
-                    logger.warn("User {} archived  a book \"{}\"(ISBN: {})", loggedUser.getEmail(), book.getTitle(),book.getIsbn());
+                    logger.warn("User {} archived a book \"{}\"(ISBN: {})", loggedUser.getEmail(), book.getTitle(),book.getIsbn());
                 }
             }
             else alert.emptyAlertMessage(s);
@@ -195,6 +221,7 @@ public class BooksPaneController {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/addBook.fxml"));
         Parent root = loader.load();
         AddBookController controller = loader.getController();
+        controller.setParam(bookService);
         controller.setLoggedUser(loggedUser);
 
         Stage dialogStage = new Stage();

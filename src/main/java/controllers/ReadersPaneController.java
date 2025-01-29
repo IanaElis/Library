@@ -21,10 +21,10 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.util.converter.IntegerStringConverter;
 import javafx.util.converter.LocalDateStringConverter;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import services.BorrowingService;
 import services.UserService;
-import util.LoggerUtil;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -70,16 +70,22 @@ public class ReadersPaneController {
     @FXML
     private Button return_btn;
 
-    private UserService userService = new UserService();
-    private BorrowingService borrowingService = new BorrowingService();
-    private ObservableList<Borrowing> borrowings;
-    private ObservableList<User> readers;
-    private AlertMessage alert = new AlertMessage();
-    private static final Logger logger = LoggerUtil.getLogger();
+    private UserService userService;
+    private BorrowingService borrowingService;
+
+    ObservableList<Borrowing> borrowings;
+    ObservableList<User> readers;
+    AlertMessage alert = new AlertMessage();
+    private static final Logger logger = LogManager.getLogger(ReadersPaneController.class);
     private User loggedUser;
 
     public void setLoggedUser(User user) {
         this.loggedUser = user;
+    }
+
+    public void setParam(UserService us, BorrowingService brs){
+        userService = us;
+        borrowingService = brs;
     }
 
     public void initialize() {
@@ -171,7 +177,7 @@ public class ReadersPaneController {
                         alert.successMessage(result,"Congrats");
                         logger.info("Book (ISBN: {}) was returned by reader {}. Performed by user {}",
                                 borrowing.getBook().getIsbn(), borrowing.getUser().getEmail(), loggedUser.getEmail());
-                        borBooks_table.refresh();
+                        updateList(borrowing.getUser().getUserId());
                     }
 
                     else alert.emptyAlertMessage(result);
@@ -184,17 +190,23 @@ public class ReadersPaneController {
         }
     }
 
-    public void addReaderManually() throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/addReader.fxml"));
-        Parent root = loader.load();
+    public void addReaderManually(){
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/addReader.fxml"));
+            Parent root = loader.load();
 
-        AddUserController controller = loader.getController();
-        controller.setParentPane(readers_form);
-        controller.setLoggedUser(loggedUser);
+            AddUserController controller = loader.getController();
+            controller.setParam(userService);
+            controller.setParentPane(readers_form);
+            controller.setLoggedUser(loggedUser);
 
-        Stage dialogStage = new Stage();
-        dialogStage.setScene(new Scene(root));
-        dialogStage.showAndWait();
+            Stage dialogStage = new Stage();
+            dialogStage.setScene(new Scene(root));
+            dialogStage.showAndWait();
+        }catch(IOException e){
+            logger.error("Failed to load addReader.fxml", e);
+            alert.emptyAlertMessage("Failed to load the Add Reader form");
+        }
     }
 
     public void updateReader(User user){
@@ -208,12 +220,11 @@ public class ReadersPaneController {
         if(readers_table.getSelectionModel().getSelectedItem() != null) {
             User user = readers_table.getSelectionModel().getSelectedItem();
             userService.deleteUser(user);
+            readers.remove(user);
             logger.warn("User {} deleted user {}", loggedUser.getEmail(), user.getEmail());
             readers_table.refresh();
         }
         else alert.emptyAlertMessage("Please select a reader to delete");
     }
-
-
 
 }
