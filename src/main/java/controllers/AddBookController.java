@@ -1,6 +1,5 @@
 package controllers;
 
-import dao.BookStatusDAO;
 import entity.Book;
 import entity.User;
 import javafx.collections.FXCollections;
@@ -9,9 +8,9 @@ import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import services.BookService;
-import util.LoggerUtil;
 
 import java.time.LocalDate;
 
@@ -34,11 +33,14 @@ public class AddBookController {
     @FXML
     private TextField publisher;
 
-    private AlertMessage alert = new AlertMessage();
-    private BookStatusDAO bookStatusDAO = new BookStatusDAO();
-    private BookService bookService = new BookService();
-    private static final Logger logger = LoggerUtil.getLogger();
+    private final AlertMessage alert = new AlertMessage();
+    private BookService bookService;
+    private static final Logger logger = LogManager.getLogger(AddBookController.class);
     private User loggedUser;
+
+    public void setParam(BookService bs){
+        bookService = bs;
+    }
 
     public void setLoggedUser(User user) {
         this.loggedUser = user;
@@ -75,7 +77,7 @@ public class AddBookController {
             }
 
             Book book = new Book(isbn, title, author, genre, year,
-                    bookStatusDAO.getBookStatus(2),
+                    bookService.getBookStatus(2),
                     parsedTotalQ, parsedAvQ, publisher);
 
             String s = bookService.addBook(book);

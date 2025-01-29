@@ -65,9 +65,12 @@ public class User implements Observer {
 
 
     @Override
-    public void update(Notification notification) {
+    public void update(Notification notification, String email) {
         UserNotificationDAO un = new UserNotificationDAO();
-        UserNotification userNotification = new UserNotification(this, notification, false);
+        UserNotification userNotification = new UserNotification(this, notification, false, LocalDate.now());
+        if(email != null) {
+            userNotification.setAdditionalInfo(email);
+        }
         un.saveOrUpdate(userNotification);
     }
 

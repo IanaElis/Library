@@ -8,11 +8,9 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import services.BookService;
-import services.BorrowingService;
-import services.UserService;
-import util.LoggerUtil;
+import services.*;
 
 import java.util.List;
 
@@ -32,17 +30,20 @@ public class ReportsPaneController {
     private UserService userService;
     private BookService bookService;
     private BorrowingService borrowingService;
-    private static final Logger logger = LoggerUtil.getLogger();
+    private UserRatingService userRatingService;
+    private static final Logger logger = LogManager.getLogger(ReportsPaneController.class);
     private User loggedUser;
+
+    public void setParam(UserService us, BookService bs, BorrowingService brs,
+                         UserRatingService urs){
+        userService = us;
+        bookService = bs;
+        borrowingService = brs;
+        userRatingService = urs;
+    }
 
     public void setLoggedUser(User user) {
         this.loggedUser = user;
-    }
-
-    public ReportsPaneController() {
-        userService = new UserService();
-        bookService = new BookService();
-        borrowingService = new BorrowingService();
     }
 
     public void makeReports(ActionEvent event) {
@@ -60,7 +61,7 @@ public class ReportsPaneController {
                 report.append("Phone number: ").append(form.getPhoneNumber()).append("\n");
                 report.append("\n\n");
             }
-            logger.info("User {} requested forms report", loggedUser);
+            logger.info("User {} requested forms report", loggedUser.getEmail());
         }
         else if(event.getSource() == rep_books) {
             List<Book> books = bookService.getAllBooks();
@@ -78,7 +79,7 @@ public class ReportsPaneController {
                 report.append("Total quantity: ").append(book.getTotalQuantity()).append("\n");
                 report.append("\n\n");
             }
-            logger.info("User {} requested books report", loggedUser);
+            logger.info("User {} requested books report", loggedUser.getEmail());
         }
         else if(event.getSource() == rep_users) {
             List<User> users = userService.getAllUsers();
@@ -100,12 +101,35 @@ public class ReportsPaneController {
                 }
                 report.append("\n\n");
             }
-            logger.info("User {} requested users report", loggedUser);
+            logger.info("User {} requested users report", loggedUser.getEmail());
         }
         else if(event.getSource() == rep_rating) {
-            logger.info("User {} requested user rating report", loggedUser);
+            List<List<User>> userRatings = userRatingService.calculateUserRatings();
+            List<User> loyalUsers = userRatings.get(0);
+            List<User> unloyalUsers = userRatings.get(1);
+            report.append("*LOYAL USERS*: \n");
+            appendUserDetails(loyalUsers, report);
+            report.append("*NON-LOYAL USERS*: \n");
+            appendUserDetails(unloyalUsers, report);
+            logger.info("User {} requested user rating report", loggedUser.getEmail());
         }
         rep_report.setText(report.toString());
+    }
+
+    private void appendUserDetails(List<User> users, StringBuilder report) {
+        for (User user : users) {
+            int booksBorrowed = borrowingService.getBorrowedBooksCount(user.getUserId());
+            int booksOverdue = borrowingService.getLateReturnCount(user.getUserId());
+            int booksDamaged = borrowingService.getDamagedBooksCount(user.getUserId());
+
+            report.append("ID: ").append(user.getUserId()).append("\n");
+            report.append("Date: ").append(user.getApprovalDate()).append("\n");
+            report.append("Email: ").append(user.getEmail()).append("\n");
+            report.append("Borrowed: ").append(booksBorrowed).append("\n");
+            report.append("Returned late: ").append(booksOverdue).append("\n");
+            report.append("Damaged: ").append(booksDamaged).append("\n");
+            report.append("\n\n");
+        }
     }
 
 }

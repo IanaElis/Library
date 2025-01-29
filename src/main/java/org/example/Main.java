@@ -1,31 +1,31 @@
 package org.example;
 
-import dao.RegisterFormDAO;
-import dao.RegisterStatusDAO;
-import entity.RegisterForm;
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.time.LocalDate;
+public class Main extends Application {
 
-public class Main {
+    private static final Logger logger = LogManager.getLogger(Main.class);
+
     public static void main(String[] args) {
-        System.out.println("Hello and welcome!");
-        //RoleDAO roledao = new RoleDAO();
-        RegisterStatusDAO registerStatusDAO = new RegisterStatusDAO();
-        RegisterForm regForm = new RegisterForm(1,"ivanov@gmail.bg",
-                "1234", "Ivan Ivanov", 885678907,
-                registerStatusDAO.getRegisterStatusById(1), LocalDate.now());
+        launch(args);
+    }
 
-        RegisterFormDAO registerFormDAO = new RegisterFormDAO();
-        //registerFormDAO.saveRegisterForm(regForm);
-
-
-
-    //    registerFormDAO.deleteRegisterForm(regForm);
-        /*User user = new User(regForm.getEmail(), regForm.getPassword(),
-                regForm.getName(), regForm.getPhoneNumber(), regForm.getDateCreated(),
-                regForm, roledao.getRoleById(1) );
-        UserDAO.saveUser(user);
-
-         */
+    @Override
+    public void start(Stage primaryStage) throws Exception{
+        logger.info("Application started.");
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/login.fxml"));
+        Parent root = loader.load();
+        Scene scene = new Scene(root);
+        primaryStage.setMinHeight(350);
+        primaryStage.setMinWidth(500);
+        primaryStage.setTitle("Library Information System");
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
 }

@@ -44,6 +44,12 @@ public class UserDAO extends BaseDAO<User> {
         }
     }
 
+    public int countAllReaders() {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery("FROM User WHERE  role.roleID = 1", User.class).list().size();
+        }
+    }
+
         public User getUserByEmail(String email) {
             if (email == null || email.isEmpty()) {
                 throw new IllegalArgumentException("Email cannot be null or empty.");

@@ -1,6 +1,5 @@
 package entity;
 import java.time.LocalDate;
-import java.util.Date;
 
 import javax.persistence.*;
 
@@ -17,20 +16,10 @@ public class Notification  {
     @Column(name = "ntfc_date")
     private LocalDate creation_date;
 
-    @Column(name="additional_info")
-    private String additionalInfo;
-
     public Notification() {}
 
     public Notification(String message,
-                        LocalDate creation_date, boolean isRead) {
-        this.message = message;
-        this.creation_date = creation_date;
-    }
-
-    public Notification(int notifID, String message,
-                        LocalDate creation_date, boolean isRead) {
-        this.notifID = notifID;
+                        LocalDate creation_date) {
         this.message = message;
         this.creation_date = creation_date;
     }
@@ -59,10 +48,4 @@ public class Notification  {
         this.creation_date = creation_date;
     }
 
-    public String getAdditionalInfo() {
-        return additionalInfo;
-    }
-    public void setAdditionalInfo(String additionalInfo) {
-        this.additionalInfo = additionalInfo;
-    }
 }

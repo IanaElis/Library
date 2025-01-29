@@ -1,6 +1,7 @@
 package entity;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "User_Notification")
@@ -24,13 +25,20 @@ public class UserNotification {
     @Column(name = "is_read")
     private boolean isRead;
 
+    @Column(name="additional_info")
+    private String additionalInfo;
+
+    @Column(name = "date_sent")
+    private LocalDate dateSent;
+
     public UserNotification() {}
 
     public UserNotification(User user, Notification notification,
-                            boolean isRead) {
+                            boolean isRead, LocalDate dateSent) {
         this.user = user;
         this.notification = notification;
         this.isRead = isRead;
+        this.dateSent = dateSent;
     }
 
     public int getId() {
@@ -63,6 +71,13 @@ public class UserNotification {
 
     public void setRead(boolean read) {
         isRead = read;
+    }
+
+    public String getAdditionalInfo() {
+        return additionalInfo;
+    }
+    public void setAdditionalInfo(String additionalInfo) {
+        this.additionalInfo = additionalInfo;
     }
 
 }

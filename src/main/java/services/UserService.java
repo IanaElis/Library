@@ -3,56 +3,57 @@ package services;
 import dao.*;
 import entity.Notification;
 import entity.RegisterForm;
-import entity.RegisterStatus;
+import entity.Role;
 import entity.User;
 import javafx.util.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import util.PasswordUtil;
 
 import java.time.LocalDate;
 import java.util.List;
 
 public class UserService {
 
-    private UserDAO userDAO;
-    private RegisterFormDAO registerFormDAO;
-    private NotificationDAO notificationDAO;
-    private NotificationService notificationService;
-    private RoleDAO roleDAO;
-    private RegisterStatusDAO registerStatusDAO;
+    private final UserDAO userDAO;
+    private final RegisterFormDAO registerFormDAO;
+    private final NotificationService notificationService;
+    private final RoleDAO roleDAO;
+    private final RegisterStatusDAO registerStatusDAO;
+    private static final Logger logger = LogManager.getLogger(UserService.class);
 
-    public UserService() {
-        userDAO = new UserDAO();
-        registerFormDAO = new RegisterFormDAO();
-        notificationDAO = new NotificationDAO();
-        notificationService = new NotificationService();
-        roleDAO = new RoleDAO();
-        registerStatusDAO = new RegisterStatusDAO();
+    public UserService(UserDAO us, RegisterFormDAO regd, NotificationService ns,
+                       RoleDAO rd, RegisterStatusDAO rsd) {
+        userDAO = us;
+        registerFormDAO = regd;
+        notificationService = ns;
+        roleDAO = rd;
+        registerStatusDAO = rsd;
     }
 
     public Pair<User, String> authenticateUser(String email, String password) {
-        if (email == null || password == null || email.isEmpty() || password.isEmpty()) {
-            throw new IllegalArgumentException("Email or password cannot be null");
-        }
         User user = userDAO.getUserByEmail(email);
 
         if (user == null) {
             return new Pair<>(null, "User does not exist.");
         }
 
-        if (!user.getPassword().equals(password)) {
+        if (!PasswordUtil.verifyPassword(user.getPassword(), password)) {
             return new Pair<>(null, "Incorrect password.");
         }
         return new Pair<>(user, null);
     }
 
     public int findRegForm(String email, String password) {
-        if (email == null || password == null || email.isEmpty() || password.isEmpty()) {
-            throw new IllegalArgumentException("Email or password cannot be null");
-        }
-        RegisterForm form = registerFormDAO.getRegisterFormsByEmailPass(email, password);
+        RegisterForm form = registerFormDAO.getRegisterFormsByEmail(email);
         if (form == null) {
             return 0;
         }
-        return form.getStatus().getRegStatId();
+        boolean isPasswordCorrect = PasswordUtil.verifyPassword(form.getPassword(), password);
+        if (!isPasswordCorrect) {
+            return 0;
+        }
+        else return form.getStatus().getRegStatId();
     }
 
     public boolean registerUser(RegisterForm form) {
@@ -63,11 +64,8 @@ public class UserService {
         boolean registerFormSaved = registerFormDAO.saveOrUpdate(form);
 
         if (registerFormSaved) {
-            Notification ntfc = new Notification("A new registration form has been submitted",
-                    LocalDate.now(), false);
-            ntfc.setAdditionalInfo("User email: " + form.getEmail());
-            notificationDAO.saveOrUpdate(ntfc);
-            notificationService.notifyAdminsOperators(ntfc);
+            Notification ntfc = notificationService.getNotificationById(1);
+            notificationService.notifyAdminsOperators(ntfc, form.getEmail());
         }
         return registerFormSaved;
     }
@@ -84,16 +82,18 @@ public class UserService {
         return registerFormDAO.getRegisterFormsByEmail(email);
     }
 
-    public void approveReader(RegisterForm form) {
-        if(registerFormDAO.getRegisterFormsByEmail(form.getEmail()).getStatus().getRegStatId() != 2) {
+    public boolean approveReader(RegisterForm form) {
+        if(registerFormDAO.getRegisterFormsByEmail(form.getEmail()).getStatus().getRegStatId() == 1) {
             form.setStatus(registerStatusDAO.getRegisterStatusById(2));
             registerFormDAO.saveOrUpdate(form);
-            if (userDAO.getUserByEmail(form.getEmail()) == null) {
-                User user = new User(form.getEmail(), form.getPassword(), form.getName(),
-                        form.getPhoneNumber(), LocalDate.now(), form, roleDAO.getRoleById(1));
-                userDAO.saveOrUpdate(user);
-            }
+
+            User user = new User(form.getEmail(), form.getPassword(), form.getName(),
+                    form.getPhoneNumber(), LocalDate.now(), form, roleDAO.getRoleById(1));
+            userDAO.saveOrUpdate(user);
+            logger.info("User {} created successfully", form.getEmail());
+            return true;
         }
+        else return false;
     }
 
     public boolean denyReader(RegisterForm form) {
@@ -111,7 +111,7 @@ public class UserService {
         }
         else{
             String role = userDAO.getUserByEmail(user.getEmail()).getRole().getName();
-            System.out.println("The " + role.toLowerCase() + " doesn't exist");
+            logger.warn("The {} doesn't exist", role.toLowerCase());
         }
     }
 
@@ -120,9 +120,21 @@ public class UserService {
             userDAO.delete(user);
         }
         else{
-            String role = userDAO.getUserByEmail(user.getEmail()).getRole().getName();
-                System.out.println("The " + role.toLowerCase() + " doesn't exist");
+            String role = (user.getRole() != null) ? user.getRole().getName() : "unknown";
+            logger.warn("The {} doesn't exist", role.toLowerCase());
         }
+    }
+
+    public Role getRole(int id){
+        return roleDAO.getRoleById(id);
+    }
+
+    public int countAllReaders(){
+        return userDAO.countAllReaders();
+    }
+
+    public void saveOrUpdate(User user){
+        userDAO.saveOrUpdate(user);
     }
 
     public List<User> getAllOperators() {
@@ -146,10 +158,6 @@ public class UserService {
 
     public List<RegisterForm> getAllRegisterForms() {
         return registerFormDAO.getAllRegisterForms();
-    }
-
-    public User getUserByEmail(String email){
-        return userDAO.getUserByEmail(email);
     }
 
 }

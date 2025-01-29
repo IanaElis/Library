@@ -20,9 +20,10 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.util.Pair;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import services.UserService;
-import util.LoggerUtil;
+import services.*;
+import util.PasswordUtil;
 
 public class LoginController  {
     @FXML
@@ -55,9 +56,11 @@ public class LoginController  {
     @FXML
     private TextField register_showPass;
 
-    private AlertMessage alert = new AlertMessage();
-    private UserService userService = new UserService();
-    private static final Logger logger = LoggerUtil.getLogger();
+    AlertMessage alert = new AlertMessage();
+    private final UserService userService = ServicesDAOs.getUserService();
+    private final BookService bookService = ServicesDAOs.getBookService();
+    private final NotificationService notificationService = ServicesDAOs.getNotificationService();
+    private static final Logger logger = LogManager.getLogger(LoginController.class);
 
     public void switchForm(ActionEvent event) {
         if(event.getSource() == login_registerLink) {
@@ -139,11 +142,11 @@ public class LoginController  {
         }
         if (user.getRole().getRoleID() == 2) {
             //operator
-            fxmlFile = "/fxml/operatorDashboard.fxml";
+            fxmlFile = "/fxml/operatorAccount.fxml";
         }
         if (user.getRole().getRoleID() == 3) {
             //admin
-            fxmlFile = "/fxml/adminDashboard.fxml";
+            fxmlFile = "/fxml/AdminAccount.fxml";
         }
 
         if(fxmlFile == null){
@@ -159,23 +162,25 @@ public class LoginController  {
 
         if(user.getRole().getRoleID() == 1){
             ReaderController reader = loader.getController();
-            reader.setLoggedUser(user);
             reader.getDefaultPane();
+            reader.setLoggedUser(user);
         }
         if(user.getRole().getRoleID() == 2){
             OperatorController operator = loader.getController();
             operator.setLoggedUser(user);
+            operator.getDefaultPane();
         }
         if(user.getRole().getRoleID() == 3) {
             AdminController admin = loader.getController();
             admin.setLoggedUser(user);
-            admin.showDashboard();
+            admin.getDefaultPane();
         }
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         stage.setScene(new Scene(root));
         stage.show();
         logger.info("User {} logged in successfully", user.getEmail());
         NotificationsPaneController controller = new NotificationsPaneController();
+        controller.setParam(userService, bookService, notificationService);
         controller.showUnreadNotificationsAlert(user.getUserId());
     }
 
@@ -198,19 +203,22 @@ public class LoginController  {
         } else {
             matchPasswords();
 
-            RegisterForm form = new RegisterForm(email, password, name, phoneNumber,
+            String hashedPass = PasswordUtil.hashPassword(password);
+
+            RegisterForm form = new RegisterForm(email, hashedPass, name, phoneNumber,
                     new RegisterStatusDAO().getRegisterStatusById(1), LocalDate.now());
-            //send the register form to the database and to the operator/admin
             if (userService.registerUser(form)) {
-                alert.successMessage("Registration successful! Pending " +
+                alert.successMessage("Registration successful! Pending" +
                         " approval", "Congratulations!");
                 logger.info("Registration form with ID {} created successfully", form.getRegFormId());
+                logger.info("Notification for new registration form submitted sent.");
                 switchForm(new ActionEvent(register_loginLink, null));
             }
-            else alert.emptyAlertMessage("Registration failed. " +
-                    "Email might already be registered");
+            else{
+                alert.emptyAlertMessage("Registration failed. " +
+                        "Email might already be registered");
+                logger.warn("Registration denied due to email already existing");
+            }
         }
     }
-
-
 }
